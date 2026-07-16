@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { redactSecrets, shouldNeverSendPath } from './redact';
+import { analyzeWorkspace } from './projectIntel';
 
 const execFileAsync = promisify(execFile);
 
@@ -75,6 +76,14 @@ export const TOOL_DEFS: ToolDef[] = [
 				cwd: { type: 'string', description: 'Optional relative cwd' },
 			},
 			required: ['command'],
+		},
+	},
+	{
+		name: 'project_overview',
+		description: 'Summarize the open crypto/project folder: kind (Foundry/Hardhat/Next/etc), contracts, scripts, README, suggested next steps.',
+		parameters: {
+			type: 'object',
+			properties: {},
 		},
 	},
 ];
@@ -260,11 +269,23 @@ export async function runTool(
 				return { ok: false, command: cmd, output: msg.text.slice(0, 12_000), error: 'Command failed' };
 			}
 		}
+		case 'project_overview': {
+			const intel = analyzeWorkspace();
+			if (!intel) {
+				return { ok: false, error: 'Open a project folder first (Home -> Open project).' };
+			}
+			return { ok: true, ...intel };
+		}
 		default:
 			return { error: `Unknown tool: ${name}` };
 	}
 }
 
 export function isSafeTool(name: string): boolean {
-	return name === 'workspace_list' || name === 'workspace_read' || name === 'workspace_search';
+	return (
+		name === 'workspace_list' ||
+		name === 'workspace_read' ||
+		name === 'workspace_search' ||
+		name === 'project_overview'
+	);
 }

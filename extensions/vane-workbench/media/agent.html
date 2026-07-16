@@ -73,18 +73,20 @@
 <body>
 	<div class="wrap">
 		<header>
-			<h1>Agent</h1>
+			<h1>Vane Agent</h1>
 			<div class="meta" id="meta">Loading...</div>
 		</header>
 		<div id="log">
 			<div class="empty" id="empty">
-				Talk like Cursor: ask to find files, edit contracts, run forge/npm tests.
+				Tell Vane what you want in plain English. It can look at your project files and suggest edits (you always approve writes).
 				<br/><br/>
-				Example: "Find the deploy script and summarize how Base is configured."
+				Try: "Explain this project simply" or "Help me add a basic token contract."
+				<br/><br/>
+				Tip: open Home first if you do not have a project folder yet.
 			</div>
 		</div>
 		<footer>
-			<textarea id="input" placeholder="Ask Vane to build, edit, or explain..."></textarea>
+			<textarea id="input" placeholder="What do you want to build or understand?"></textarea>
 			<div class="row">
 				<button class="secondary" id="keyBtn" type="button">API key</button>
 				<button class="secondary" id="newBtn" type="button">New</button>
@@ -123,8 +125,8 @@
 		window.addEventListener('message', (e) => {
 			const m = e.data;
 			if (m.type === 'config') {
-				meta.textContent = (m.hasKey ? 'Key set' : 'No API key') +
-					' · ' + m.provider + '/' + m.model + ' · mode ' + m.mode;
+				meta.textContent = (m.hasKey ? 'Ready' : 'Add an API key to chat') +
+					' · ' + m.provider + '/' + m.model + ' · ' + (m.modeLabel || m.mode);
 				return;
 			}
 			if (m.type === 'cleared') {

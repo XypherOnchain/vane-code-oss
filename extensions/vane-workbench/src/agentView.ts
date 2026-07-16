@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { runAgentTurn, type AgentEvent } from './agentLoop';
 import type { ChatMessage } from './modelGateway';
+import { modeLabel } from './projectIntel';
 
 export const SECRET_KEY = 'vane.agent.apiKey';
 
@@ -60,11 +61,13 @@ export class AgentViewProvider implements vscode.WebviewViewProvider {
 	async pushConfig(): Promise<void> {
 		const cfg = vscode.workspace.getConfiguration('vane');
 		const key = await this.context.secrets.get(SECRET_KEY);
+		const mode = String(cfg.get('operatingMode') || 'code_only');
 		this.post({
 			type: 'config',
 			provider: cfg.get('agent.provider') || 'openai',
 			model: cfg.get('agent.model') || 'gpt-4o-mini',
-			mode: cfg.get('operatingMode') || 'code_only',
+			mode,
+			modeLabel: modeLabel(mode),
 			hasKey: Boolean(key),
 		});
 	}

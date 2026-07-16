@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Vane AI</title>
+	<style>
+		:root {
+			color-scheme: dark;
+			--bg: #0f1419;
+			--fg: #e8eef4;
+			--muted: #8b9aab;
+			--accent: #3d8bfd;
+			--accent-fg: #fff;
+			--panel: #161c24;
+			--border: #243041;
+			--soon: #6b7c8f;
+		}
+		* { box-sizing: border-box; }
+		html, body {
+			height: 100%; margin: 0;
+			font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+			color: var(--fg);
+			background:
+				radial-gradient(1200px 600px at 10% -10%, rgba(61, 139, 253, 0.18), transparent 55%),
+				radial-gradient(900px 500px at 100% 0%, rgba(40, 180, 140, 0.12), transparent 50%),
+				var(--bg);
+		}
+		.shell {
+			max-width: 880px;
+			margin: 0 auto;
+			padding: 48px 28px 64px;
+			min-height: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+		.brand {
+			font-size: 42px;
+			font-weight: 700;
+			letter-spacing: -0.03em;
+			margin: 0 0 10px;
+			line-height: 1.1;
+		}
+		.tag {
+			margin: 0 0 28px;
+			font-size: 17px;
+			line-height: 1.45;
+			color: var(--muted);
+			max-width: 36em;
+		}
+		.project {
+			display: none;
+			margin-bottom: 22px;
+			padding: 14px 16px;
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: 10px;
+		}
+		.project.show { display: block; }
+		.project strong { display: block; font-size: 14px; margin-bottom: 4px; }
+		.project span { color: var(--muted); font-size: 13px; }
+		.project .row { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 12px;
+		}
+		@media (max-width: 640px) {
+			.grid { grid-template-columns: 1fr; }
+			.brand { font-size: 34px; }
+		}
+		.card {
+			text-align: left;
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 18px 16px;
+			cursor: pointer;
+			color: var(--fg);
+			font: inherit;
+		}
+		.card:hover { border-color: var(--accent); }
+		.card.primary {
+			background: linear-gradient(180deg, rgba(61, 139, 253, 0.22), var(--panel));
+			border-color: rgba(61, 139, 253, 0.55);
+		}
+		.card h2 {
+			margin: 0 0 6px;
+			font-size: 16px;
+			font-weight: 600;
+		}
+		.card p {
+			margin: 0;
+			font-size: 13px;
+			line-height: 1.4;
+			color: var(--muted);
+		}
+		.card .badge {
+			display: inline-block;
+			margin-top: 10px;
+			font-size: 11px;
+			color: var(--soon);
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+		}
+		.learn {
+			display: none;
+			margin-top: 18px;
+			padding: 16px;
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: 10px;
+			font-size: 13px;
+			line-height: 1.55;
+			color: var(--muted);
+		}
+		.learn.show { display: block; }
+		.learn h3 { margin: 0 0 8px; color: var(--fg); font-size: 14px; }
+		.learn ol { margin: 0; padding-left: 18px; }
+		.foot {
+			margin-top: 28px;
+			font-size: 12px;
+			color: var(--muted);
+		}
+		button.link {
+			background: none;
+			border: none;
+			color: var(--accent);
+			cursor: pointer;
+			font: inherit;
+			padding: 0;
+		}
+	</style>
+</head>
+<body>
+	<div class="shell">
+		<h1 class="brand">Vane AI</h1>
+		<p class="tag">Build crypto projects, talk to an agent that can edit your files, and manage wallets safely when you are ready. No coding experience required to start.</p>
+
+		<div class="project" id="project">
+			<strong id="projectName">Project</strong>
+			<span id="projectMeta">Open a folder to see what Vane found.</span>
+			<div class="row">
+				<button class="card primary" style="padding:10px 12px;flex:1" data-action="askProject">Ask Agent about this project</button>
+				<button class="card" style="padding:10px 12px;flex:1" data-action="openProjectView">Project overview</button>
+			</div>
+		</div>
+
+		<div class="grid">
+			<button class="card primary" data-action="openProject">
+				<h2>Open project</h2>
+				<p>Choose a folder on your computer (a website, Solidity repo, or any crypto project).</p>
+			</button>
+			<button class="card" data-action="newProject">
+				<h2>New project</h2>
+				<p>Create a simple starter folder with a README so you have somewhere to begin.</p>
+			</button>
+			<button class="card" data-action="askAgent">
+				<h2>Ask Agent</h2>
+				<p>Describe what you want in plain English. Vane can read and edit files after you approve.</p>
+			</button>
+			<button class="card" data-action="wallets">
+				<h2>Wallets</h2>
+				<p>Connect and manage wallets for simulation and test funds.</p>
+				<span class="badge">Coming soon</span>
+			</button>
+			<button class="card" data-action="trade">
+				<h2>Trade and launch</h2>
+				<p>Swaps, bridges, and token launches with approve-before-send safety.</p>
+				<span class="badge">Coming soon</span>
+			</button>
+			<button class="card" data-action="learn">
+				<h2>Learn the basics</h2>
+				<p>A 60-second tour of how Vane works without jargon.</p>
+			</button>
+		</div>
+
+		<div class="learn" id="learn">
+			<h3>How Vane works</h3>
+			<ol>
+				<li><strong>Open or create a project</strong> - this is just a folder of files on your computer.</li>
+				<li><strong>Ask the Agent</strong> - tell it what you want. It can look at files and suggest edits.</li>
+				<li><strong>Approve changes</strong> - writes and terminal commands always ask you first.</li>
+				<li><strong>Wallets and money later</strong> - Safe mode only for now. Live sending cannot be turned on by the AI.</li>
+			</ol>
+		</div>
+
+		<p class="foot">You are in <span id="modeLabel">Safe mode</span>. <button class="link" data-action="home">Refresh Home</button></p>
+	</div>
+	<script>
+		const vscode = acquireVsCodeApi();
+		const project = document.getElementById('project');
+		const projectName = document.getElementById('projectName');
+		const projectMeta = document.getElementById('projectMeta');
+		const learn = document.getElementById('learn');
+		const modeLabel = document.getElementById('modeLabel');
+
+		document.querySelectorAll('[data-action]').forEach((el) => {
+			el.addEventListener('click', () => {
+				const action = el.getAttribute('data-action');
+				if (action === 'learn') {
+					learn.classList.toggle('show');
+					return;
+				}
+				vscode.postMessage({ type: 'action', action });
+			});
+		});
+
+		window.addEventListener('message', (e) => {
+			const m = e.data;
+			if (m.type === 'state') {
+				modeLabel.textContent = m.modeLabel || 'Safe mode';
+				if (m.hasProject) {
+					project.classList.add('show');
+					projectName.textContent = m.projectName || 'Open project';
+					projectMeta.textContent = m.projectSummary || '';
+				} else {
+					project.classList.remove('show');
+				}
+			}
+		});
+
+		vscode.postMessage({ type: 'ready' });
+	</script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 {
   "name": "vane-workbench",
   "displayName": "Vane Workbench",
-  "description": "Cursor-like Agent chat for crypto repos, plus Wallets/Transactions placeholders.",
-  "version": "0.2.0",
+  "description": "Beginner-first Vane Home, Agent chat, and crypto project overview.",
+  "version": "0.3.0",
   "publisher": "vane",
   "license": "MIT",
   "engines": {
@@ -27,6 +27,13 @@
     "@types/node": "24.x"
   },
   "contributes": {
+    "configurationDefaults": {
+      "workbench.startupEditor": "none",
+      "workbench.tips.enabled": false,
+      "workbench.welcomePage.walkthroughs.openOnInstall": false,
+      "chat.commandCenter.enabled": false,
+      "workbench.secondarySideBar.defaultVisibility": "hidden"
+    },
     "configuration": {
       "title": "Vane",
       "properties": {
@@ -35,38 +42,38 @@
           "default": "code_only",
           "enum": ["code_only", "simulation", "testnet", "live"],
           "enumDescriptions": [
-            "Edit and run tools without chain writes",
-            "Fork / simulate only",
-            "Testnet broadcast after approval",
-            "Mainnet — user UI only; AI cannot enable"
+            "Safe mode - edit and run tools, no chain sends",
+            "Simulation only - practice without real money",
+            "Testnet - practice network after you approve",
+            "Live mainnet - you only; the Agent can never enable this"
           ],
-          "description": "Operating mode. Live must never be enabled by the agent."
+          "description": "How carefully Vane treats money moves. The Agent cannot enable Live."
         },
         "vane.agent.provider": {
           "type": "string",
           "default": "openai",
           "enum": ["openai", "anthropic"],
-          "description": "Model provider for the Agent panel."
+          "description": "Which AI company powers the Agent (more providers coming)."
         },
         "vane.agent.model": {
           "type": "string",
           "default": "gpt-4o-mini",
-          "description": "Model id (e.g. gpt-4o-mini, claude-sonnet-4-20250514)."
+          "description": "Model name (example: gpt-4o-mini, claude-sonnet-4-20250514)."
         },
         "vane.agent.autoRunSafeTools": {
           "type": "boolean",
           "default": true,
-          "description": "Auto-run read/search tools. Writes and terminal still ask for approval."
+          "description": "Auto-run read-only tools. Writes and terminal still ask you first."
         },
         "vane.placeholderChain": {
           "type": "string",
           "default": "Base Sepolia",
-          "description": "Placeholder chain label for the status bar."
+          "description": "Network label shown in the status bar (placeholder until wallets)."
         },
         "vane.placeholderWallet": {
           "type": "string",
           "default": "None",
-          "description": "Placeholder wallet label (no vault yet)."
+          "description": "Wallet label (shows as No wallet yet when empty)."
         }
       }
     },
@@ -88,21 +95,42 @@
           "contextualTitle": "Vane Agent"
         },
         {
+          "id": "vane.project",
+          "name": "Project",
+          "contextualTitle": "Project overview"
+        },
+        {
           "id": "vane.wallets",
           "name": "Wallets"
         },
         {
           "id": "vane.transactions",
-          "name": "Transactions"
+          "name": "Trade"
         }
       ]
     },
     "commands": [
       {
+        "command": "vane.openHome",
+        "title": "Vane: Open Home",
+        "category": "Vane",
+        "icon": "$(home)"
+      },
+      {
         "command": "vane.openAgent",
         "title": "Vane: Open Agent",
         "category": "Vane",
         "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "vane.openProjectOverview",
+        "title": "Vane: Project Overview",
+        "category": "Vane"
+      },
+      {
+        "command": "vane.refreshProject",
+        "title": "Vane: Refresh Project Overview",
+        "category": "Vane"
       },
       {
         "command": "vane.openWallets",
@@ -111,7 +139,7 @@
       },
       {
         "command": "vane.openTransactions",
-        "title": "Vane: Open Transactions",
+        "title": "Vane: Open Trade",
         "category": "Vane"
       },
       {
@@ -137,7 +165,10 @@
     ],
     "menus": {
       "commandPalette": [
+        { "command": "vane.openHome" },
         { "command": "vane.openAgent" },
+        { "command": "vane.openProjectOverview" },
+        { "command": "vane.refreshProject" },
         { "command": "vane.openWallets" },
         { "command": "vane.openTransactions" },
         { "command": "vane.showMode" },
@@ -147,6 +178,11 @@
       ],
       "view/title": [
         {
+          "command": "vane.openHome",
+          "when": "view == vane.agent || view == vane.project",
+          "group": "navigation"
+        },
+        {
           "command": "vane.agent.newChat",
           "when": "view == vane.agent",
           "group": "navigation"
@@ -154,6 +190,11 @@
         {
           "command": "vane.agent.setApiKey",
           "when": "view == vane.agent",
+          "group": "navigation"
+        },
+        {
+          "command": "vane.refreshProject",
+          "when": "view == vane.project",
           "group": "navigation"
         }
       ]

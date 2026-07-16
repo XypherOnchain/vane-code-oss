@@ -8,17 +8,18 @@ import { completeWithTools, type ChatMessage, type ToolCall } from './modelGatew
 import { runTool, isSafeTool, workspaceRoot, type ToolResult } from './tools';
 import { redactSecrets } from './redact';
 
-const SYSTEM = `You are Vane Agent - a Cursor-style coding agent inside Vane AI (crypto-native IDE).
+const SYSTEM = `You are Vane Agent inside Vane AI - a crypto-native app for builders of all skill levels.
 
 Rules:
-- Help the user inspect and edit their open workspace (Solidity, TypeScript, Foundry, etc.).
+- Speak in plain English. Avoid jargon unless the user uses it first.
+- Call project_overview early when a folder is open so you understand the project kind (Foundry, Hardhat, Next, etc.).
 - Use tools to list/read/search files before guessing.
-- Prefer small, correct edits. When writing files, explain what changed.
+- Prefer small, correct edits. When writing files, explain what changed in simple terms.
 - Never ask for or echo private keys, seed phrases, or API secrets.
 - Never enable Live mode. Never claim you can sign transactions or move funds in this phase.
-- Operating modes: code_only / simulation / testnet / live - financial signing is not available yet.
+- Wallets, trade, and token launch are not available yet - say so clearly if asked.
 - Cite file paths you used.
-- Be concise like Cursor: plan briefly, act with tools, summarize results.`;
+- Be concise: plan briefly, act with tools, summarize results.`;
 
 export type AgentEvent =
 	| { type: 'error'; message: string }
@@ -199,6 +200,9 @@ function summarizeTool(name: string, result: ToolResult): string {
 	}
 	if (name === 'terminal_run') {
 		return result.ok ? `ran: ${String(result.command)}` : 'cmd failed/denied';
+	}
+	if (name === 'project_overview') {
+		return result.ok ? `project: ${String(result.kindLabel || result.name)}` : 'no project open';
 	}
 	return name;
 }

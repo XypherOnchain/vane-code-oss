@@ -1,25 +1,34 @@
 # Vane Workbench
 
-Cursor-style **Agent** sidebar for Vane AI (Code—OSS).
+Beginner-first **Home**, **Agent**, and **Project** overview for Vane AI (Code-OSS).
 
-## Agent (Phase 2)
+## Open Vane
 
-1. **File → Open Folder** on a project.
-2. Command Palette → **Vane: Set Agent API Key** (OpenAI or Anthropic).
-3. Settings: `vane.agent.provider`, `vane.agent.model`.
-4. Open the **Vane** activity bar → **Agent**.
-5. Ask to find files, edit code, run tests (`Cmd/Ctrl+Enter` to send).
+1. Launch the desktop IDE (`./scripts/code.sh` from `apps/desktop-ide`).
+2. You should land on **Vane Home** (not the VS Code welcome page).
+3. **Open project** or **New project**, then use **Ask Agent**.
+
+## Agent
+
+1. Command Palette -> **Vane: Set Agent API Key**
+2. Settings: `vane.agent.provider`, `vane.agent.model`
+3. Rocket activity bar -> **Agent**
+4. Ask in plain English (`Cmd/Ctrl+Enter` to send)
 
 ### Tools
 
 | Tool | Approval |
 |------|----------|
-| `workspace_list` / `read` / `search` | Auto (if enabled) |
+| `project_overview` / list / read / search | Auto (if enabled) |
 | `workspace_write` | Always asks |
 | `terminal_run` | Always asks |
 
-Secrets are redacted before model calls. No vault, signing, or Live money movement.
+Secrets are redacted. No vault, signing, or Live money movement.
 
-## Wallets / Transactions
+## Project overview
 
-Placeholders until later phases (MetaMask / sim portfolio / tx panel).
+Detects Foundry / Hardhat / Solidity / Next-style folders and lists contracts, scripts, and next steps.
+
+## Wallets / Trade
+
+Placeholders with clear "coming soon" copy until later phases.
