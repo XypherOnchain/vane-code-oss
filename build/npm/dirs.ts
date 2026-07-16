@@ -47,6 +47,7 @@ export const dirs = [
 	'extensions/search-result',
 	'extensions/simple-browser',
 	'extensions/tunnel-forwarding',
+	'extensions/vane-workbench',
 	'extensions/terminal-suggest',
 	'extensions/typescript-language-features',
 	'extensions/vscode-api-tests',
