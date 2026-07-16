@@ -164,6 +164,12 @@ export function activate(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('vane.openHome', () => home.show(true)),
 		vscode.commands.registerCommand('vane.openAgent', () => focusAgent()),
+		vscode.commands.registerCommand('vane.agent.askWithText', async (text?: string) => {
+			await focusAgent();
+			if (text && String(text).trim()) {
+				agentView.seedInput(String(text).trim());
+			}
+		}),
 		vscode.commands.registerCommand('vane.openWallets', async () => {
 			try {
 				await vscode.commands.executeCommand('vane.wallets.focus');

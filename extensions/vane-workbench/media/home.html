@@ -2,223 +2,641 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8" />
-	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:;" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>Vane AI</title>
 	<style>
 		:root {
 			color-scheme: dark;
-			--bg: #0f1419;
-			--fg: #e8eef4;
-			--muted: #8b9aab;
-			--accent: #3d8bfd;
-			--accent-fg: #fff;
-			--panel: #161c24;
-			--border: #243041;
-			--soon: #6b7c8f;
+			--bg: #07090c;
+			--bg-elev: #0d1117;
+			--panel: #11161d;
+			--panel-2: #151b24;
+			--border: #232a35;
+			--border-soft: #1a212b;
+			--fg: #f3f5f7;
+			--muted: #8b95a5;
+			--muted-2: #6b7585;
+			--accent: #e8edf5;
+			--good: #3dd68c;
+			--good-dim: rgba(61, 214, 140, 0.15);
+			--radius: 12px;
+			--radius-sm: 8px;
+			--sidebar: 248px;
+			--font: "Segoe UI", "SF Pro Text", system-ui, -apple-system, sans-serif;
 		}
 		* { box-sizing: border-box; }
 		html, body {
 			height: 100%; margin: 0;
-			font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+			font-family: var(--font);
+			background: var(--bg);
 			color: var(--fg);
-			background:
-				radial-gradient(1200px 600px at 10% -10%, rgba(61, 139, 253, 0.18), transparent 55%),
-				radial-gradient(900px 500px at 100% 0%, rgba(40, 180, 140, 0.12), transparent 50%),
-				var(--bg);
+			font-size: 13px;
 		}
-		.shell {
-			max-width: 880px;
-			margin: 0 auto;
-			padding: 48px 28px 64px;
-			min-height: 100%;
+		button, input { font: inherit; color: inherit; }
+		button { cursor: pointer; }
+		.app {
+			display: grid;
+			grid-template-columns: var(--sidebar) 1fr;
+			height: 100%;
+			min-height: 0;
+		}
+		.sidebar {
+			background: var(--bg-elev);
+			border-right: 1px solid var(--border-soft);
 			display: flex;
 			flex-direction: column;
-			justify-content: center;
+			padding: 14px 12px;
+			gap: 12px;
+			min-height: 0;
 		}
 		.brand {
-			font-size: 42px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 4px 6px 8px;
+		}
+		.brand svg { width: 22px; height: 22px; }
+		.brand .name {
 			font-weight: 700;
-			letter-spacing: -0.03em;
-			margin: 0 0 10px;
-			line-height: 1.1;
+			letter-spacing: 0.08em;
+			font-size: 12px;
 		}
-		.tag {
-			margin: 0 0 28px;
-			font-size: 17px;
-			line-height: 1.45;
-			color: var(--muted);
-			max-width: 36em;
-		}
-		.project {
-			display: none;
-			margin-bottom: 22px;
-			padding: 14px 16px;
+		.search {
+			display: flex;
+			align-items: center;
+			gap: 8px;
 			background: var(--panel);
 			border: 1px solid var(--border);
 			border-radius: 10px;
+			padding: 8px 10px;
+			color: var(--muted);
 		}
-		.project.show { display: block; }
-		.project strong { display: block; font-size: 14px; margin-bottom: 4px; }
-		.project span { color: var(--muted); font-size: 13px; }
-		.project .row { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-		.grid {
+		.search kbd {
+			margin-left: auto;
+			font-size: 11px;
+			border: 1px solid var(--border);
+			border-radius: 6px;
+			padding: 1px 6px;
+			color: var(--muted-2);
+		}
+		.nav {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			overflow: auto;
+			flex: 1;
+			min-height: 0;
+			padding-right: 2px;
+		}
+		.nav button {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			width: 100%;
+			text-align: left;
+			background: transparent;
+			border: none;
+			border-radius: 8px;
+			padding: 8px 10px;
+			color: var(--muted);
+		}
+		.nav button:hover { background: rgba(255,255,255,0.04); color: var(--fg); }
+		.nav button.active {
+			background: rgba(255,255,255,0.07);
+			color: var(--fg);
+		}
+		.nav .ico {
+			width: 16px;
+			opacity: 0.85;
+			text-align: center;
+			font-size: 12px;
+		}
+		.section-label {
+			margin: 14px 8px 6px;
+			font-size: 10px;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--muted-2);
+		}
+		.workspace-item {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			padding: 8px 10px;
+			border-radius: 8px;
+			border: none;
+			background: transparent;
+			width: 100%;
+			text-align: left;
+			color: var(--fg);
+		}
+		.workspace-item:hover { background: rgba(255,255,255,0.04); }
+		.workspace-item .row {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+		.dot {
+			width: 7px; height: 7px; border-radius: 50%;
+			background: var(--muted-2);
+		}
+		.dot.on { background: var(--good); box-shadow: 0 0 0 3px var(--good-dim); }
+		.workspace-item .path {
+			font-size: 11px;
+			color: var(--muted-2);
+			padding-left: 15px;
+		}
+		.new-project {
+			margin-top: 6px;
+			width: 100%;
+			border: 1px dashed var(--border);
+			background: transparent;
+			border-radius: 8px;
+			padding: 8px 10px;
+			color: var(--muted);
+			text-align: left;
+		}
+		.new-project:hover { color: var(--fg); border-color: var(--muted-2); }
+		.user {
+			margin-top: auto;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 10px;
+			border-top: 1px solid var(--border-soft);
+		}
+		.avatar {
+			width: 28px; height: 28px; border-radius: 50%;
+			background: linear-gradient(135deg, #3a4454, #1a2030);
+			border: 1px solid var(--border);
+		}
+		.user .meta { flex: 1; min-width: 0; }
+		.user .meta strong { display: block; font-size: 12px; }
+		.user .meta span { color: var(--muted-2); font-size: 11px; }
+
+		.main {
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+			min-height: 0;
+			background:
+				radial-gradient(900px 420px at 70% 0%, rgba(255,255,255,0.05), transparent 55%),
+				var(--bg);
+		}
+		.topbar {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 12px 20px;
+			border-bottom: 1px solid var(--border-soft);
+		}
+		.pill {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: 999px;
+			padding: 6px 10px;
+			color: var(--muted);
+			font-size: 12px;
+		}
+		.pill strong { color: var(--fg); font-weight: 600; }
+		.topbar .spacer { flex: 1; }
+		.icon-btn {
+			width: 32px; height: 32px;
+			border-radius: 8px;
+			border: 1px solid transparent;
+			background: transparent;
+			color: var(--muted);
+		}
+		.icon-btn:hover { background: var(--panel); border-color: var(--border); color: var(--fg); }
+
+		.content {
+			flex: 1;
+			overflow: auto;
+			padding: 28px 28px 40px;
+		}
+		.hero {
 			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 12px;
+			grid-template-columns: 1fr 180px;
+			gap: 20px;
+			align-items: start;
+			margin-bottom: 18px;
 		}
-		@media (max-width: 640px) {
-			.grid { grid-template-columns: 1fr; }
-			.brand { font-size: 34px; }
+		@media (max-width: 900px) {
+			.app { grid-template-columns: 1fr; }
+			.sidebar { display: none; }
+			.hero { grid-template-columns: 1fr; }
 		}
-		.card {
+		.hero h1 {
+			margin: 0 0 8px;
+			font-size: 28px;
+			letter-spacing: -0.03em;
+			font-weight: 700;
+		}
+		.hero p {
+			margin: 0 0 18px;
+			color: var(--muted);
+			max-width: 40em;
+			line-height: 1.5;
+			font-size: 13.5px;
+		}
+		.logo-glow {
+			justify-self: end;
+			width: 150px;
+			height: 150px;
+			display: grid;
+			place-items: center;
+			filter: drop-shadow(0 0 28px rgba(255,255,255,0.18));
+		}
+		.logo-glow svg { width: 120px; height: 120px; }
+
+		.ask {
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			padding: 10px 12px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 20px 50px rgba(0,0,0,0.35);
+		}
+		.ask input {
+			flex: 1;
+			border: none;
+			outline: none;
+			background: transparent;
+			padding: 10px 4px;
+			font-size: 14px;
+		}
+		.ask input::placeholder { color: var(--muted-2); }
+		.send {
+			width: 36px; height: 36px;
+			border-radius: 10px;
+			border: none;
+			background: var(--fg);
+			color: #0b0e12;
+			font-weight: 700;
+		}
+		.chips {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-top: 12px;
+		}
+		.chip {
+			border: 1px solid var(--border);
+			background: rgba(255,255,255,0.02);
+			border-radius: 999px;
+			padding: 6px 12px;
+			color: var(--muted);
+			font-size: 12px;
+		}
+		.chip:hover { color: var(--fg); border-color: var(--muted-2); }
+
+		.actions {
+			display: grid;
+			grid-template-columns: repeat(5, minmax(0, 1fr));
+			gap: 10px;
+			margin: 22px 0;
+		}
+		@media (max-width: 1100px) {
+			.actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		}
+		.action {
 			text-align: left;
 			background: var(--panel);
 			border: 1px solid var(--border);
-			border-radius: 12px;
-			padding: 18px 16px;
-			cursor: pointer;
-			color: var(--fg);
-			font: inherit;
+			border-radius: var(--radius);
+			padding: 14px;
+			min-height: 108px;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
 		}
-		.card:hover { border-color: var(--accent); }
-		.card.primary {
-			background: linear-gradient(180deg, rgba(61, 139, 253, 0.22), var(--panel));
-			border-color: rgba(61, 139, 253, 0.55);
+		.action:hover { border-color: #3a4454; background: var(--panel-2); }
+		.action .top {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			color: var(--muted);
 		}
-		.card h2 {
-			margin: 0 0 6px;
-			font-size: 16px;
-			font-weight: 600;
-		}
-		.card p {
+		.action h3 {
 			margin: 0;
 			font-size: 13px;
+			font-weight: 600;
+		}
+		.action p {
+			margin: 0;
+			color: var(--muted-2);
+			font-size: 12px;
 			line-height: 1.4;
-			color: var(--muted);
 		}
-		.card .badge {
-			display: inline-block;
-			margin-top: 10px;
-			font-size: 11px;
-			color: var(--soon);
+		.action .soon {
+			font-size: 10px;
+			letter-spacing: 0.06em;
 			text-transform: uppercase;
-			letter-spacing: 0.04em;
+			color: var(--muted-2);
 		}
-		.learn {
-			display: none;
-			margin-top: 18px;
-			padding: 16px;
+
+		.lower {
+			display: grid;
+			grid-template-columns: 1.4fr 1fr;
+			gap: 12px;
+			margin-bottom: 12px;
+		}
+		@media (max-width: 1100px) {
+			.lower { grid-template-columns: 1fr; }
+		}
+		.card {
 			background: var(--panel);
 			border: 1px solid var(--border);
-			border-radius: 10px;
+			border-radius: var(--radius);
+			padding: 14px;
+		}
+		.card-head {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 10px;
+		}
+		.card-head h2 {
+			margin: 0;
 			font-size: 13px;
-			line-height: 1.55;
-			color: var(--muted);
+			font-weight: 600;
 		}
-		.learn.show { display: block; }
-		.learn h3 { margin: 0 0 8px; color: var(--fg); font-size: 14px; }
-		.learn ol { margin: 0; padding-left: 18px; }
-		.foot {
-			margin-top: 28px;
-			font-size: 12px;
-			color: var(--muted);
-		}
-		button.link {
+		.link {
 			background: none;
 			border: none;
-			color: var(--accent);
-			cursor: pointer;
-			font: inherit;
+			color: var(--muted);
 			padding: 0;
+			font-size: 12px;
+		}
+		.link:hover { color: var(--fg); }
+		.table { width: 100%; border-collapse: collapse; }
+		.table th {
+			text-align: left;
+			font-size: 11px;
+			color: var(--muted-2);
+			font-weight: 500;
+			padding: 0 8px 8px 0;
+		}
+		.table td {
+			padding: 10px 8px 10px 0;
+			border-top: 1px solid var(--border-soft);
+			color: var(--muted);
+			font-size: 12px;
+		}
+		.table td:first-child { color: var(--fg); font-weight: 500; }
+		.activity { display: flex; flex-direction: column; gap: 10px; }
+		.activity .item {
+			display: grid;
+			grid-template-columns: 8px 1fr auto;
+			gap: 10px;
+			align-items: start;
+		}
+		.activity .item .mark {
+			width: 8px; height: 8px; border-radius: 50%;
+			background: #cfd6e0;
+			margin-top: 4px;
+		}
+		.activity .item strong { display: block; font-size: 12px; }
+		.activity .item span { color: var(--muted-2); font-size: 11px; }
+		.activity .when { color: var(--muted-2); font-size: 11px; white-space: nowrap; }
+
+		.metrics {
+			display: grid;
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			gap: 10px;
+		}
+		@media (max-width: 1100px) {
+			.metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		}
+		.metric {
+			background: var(--panel);
+			border: 1px solid var(--border);
+			border-radius: var(--radius);
+			padding: 14px;
+		}
+		.metric .label { color: var(--muted-2); font-size: 11px; margin-bottom: 6px; }
+		.metric .value { font-size: 20px; font-weight: 650; letter-spacing: -0.02em; }
+		.metric .delta { color: var(--good); font-size: 11px; margin-top: 4px; }
+		.metric .spark {
+			margin-top: 10px;
+			height: 28px;
+			opacity: 0.7;
+		}
+		.foot-note {
+			margin-top: 14px;
+			color: var(--muted-2);
+			font-size: 11px;
 		}
 	</style>
 </head>
 <body>
-	<div class="shell">
-		<h1 class="brand">Vane AI</h1>
-		<p class="tag">Build crypto projects, talk to an agent that can edit your files, and manage wallets safely when you are ready. No coding experience required to start.</p>
-
-		<div class="project" id="project">
-			<strong id="projectName">Project</strong>
-			<span id="projectMeta">Open a folder to see what Vane found.</span>
-			<div class="row">
-				<button class="card primary" style="padding:10px 12px;flex:1" data-action="askProject">Ask Agent about this project</button>
-				<button class="card" style="padding:10px 12px;flex:1" data-action="openProjectView">Project overview</button>
+	<div class="app">
+		<aside class="sidebar">
+			<div class="brand">
+				<svg viewBox="0 0 120 120" aria-hidden="true"><path fill="#f3f5f7" d="M22 18h22l16 52 16-52h22L66 102H54L22 18z"/></svg>
+				<div class="name">VANE AI</div>
 			</div>
-		</div>
+			<div class="search"><span>Search</span><kbd>Cmd K</kbd></div>
+			<nav class="nav" id="nav">
+				<button class="active" data-action="homeNav"><span class="ico">H</span>Home</button>
+				<button data-action="askAgent"><span class="ico">A</span>Agent</button>
+				<button data-action="openProjectView"><span class="ico">P</span>Projects</button>
+				<button data-action="openProject"><span class="ico">F</span>Files</button>
+				<button data-action="openProjectView"><span class="ico">C</span>Contracts</button>
+				<button data-action="deploy"><span class="ico">D</span>Deployments</button>
+				<button data-action="wallets"><span class="ico">W</span>Wallets</button>
+				<button data-action="trade"><span class="ico">T</span>Transactions</button>
+				<button data-action="bridge"><span class="ico">B</span>Bridge</button>
+				<button data-action="trade"><span class="ico">X</span>Trade</button>
+				<button data-action="simulate"><span class="ico">S</span>Simulations</button>
+				<button data-action="settings"><span class="ico">G</span>Settings</button>
+			</nav>
+			<div class="section-label">Workspace</div>
+			<button class="workspace-item" data-action="openProjectView" id="wsActive">
+				<div class="row"><span class="dot" id="wsDot"></span><span id="wsName">No project open</span></div>
+				<div class="path" id="wsPath">Open or create a project to begin</div>
+			</button>
+			<button class="new-project" data-action="newProject">+ New Project</button>
+			<div class="user">
+				<div class="avatar"></div>
+				<div class="meta">
+					<strong>Vane User</strong>
+					<span>Local · Safe mode</span>
+				</div>
+			</div>
+		</aside>
 
-		<div class="grid">
-			<button class="card primary" data-action="openProject">
-				<h2>Open project</h2>
-				<p>Choose a folder on your computer (a website, Solidity repo, or any crypto project).</p>
-			</button>
-			<button class="card" data-action="newProject">
-				<h2>New project</h2>
-				<p>Create a simple starter folder with a README so you have somewhere to begin.</p>
-			</button>
-			<button class="card" data-action="askAgent">
-				<h2>Ask Agent</h2>
-				<p>Describe what you want in plain English. Vane can read and edit files after you approve.</p>
-			</button>
-			<button class="card" data-action="wallets">
-				<h2>Wallets</h2>
-				<p>Connect and manage wallets for simulation and test funds.</p>
-				<span class="badge">Coming soon</span>
-			</button>
-			<button class="card" data-action="trade">
-				<h2>Trade and launch</h2>
-				<p>Swaps, bridges, and token launches with approve-before-send safety.</p>
-				<span class="badge">Coming soon</span>
-			</button>
-			<button class="card" data-action="learn">
-				<h2>Learn the basics</h2>
-				<p>A 60-second tour of how Vane works without jargon.</p>
-			</button>
-		</div>
+		<section class="main">
+			<div class="topbar">
+				<div class="pill">Model <strong id="modelPill">GPT-4o</strong></div>
+				<div class="pill">Mode <strong id="modePill">Safe Mode</strong></div>
+				<div class="pill">Chain <strong id="chainPill">Base Sepolia</strong></div>
+				<div class="pill">Wallet <strong id="walletPill">No wallet connected</strong></div>
+				<div class="spacer"></div>
+				<button class="icon-btn" title="Home" data-action="homeNav">H</button>
+				<button class="icon-btn" title="Agent" data-action="askAgent">A</button>
+			</div>
 
-		<div class="learn" id="learn">
-			<h3>How Vane works</h3>
-			<ol>
-				<li><strong>Open or create a project</strong> - this is just a folder of files on your computer.</li>
-				<li><strong>Ask the Agent</strong> - tell it what you want. It can look at files and suggest edits.</li>
-				<li><strong>Approve changes</strong> - writes and terminal commands always ask you first.</li>
-				<li><strong>Wallets and money later</strong> - Safe mode only for now. Live sending cannot be turned on by the AI.</li>
-			</ol>
-		</div>
+			<div class="content">
+				<div class="hero">
+					<div>
+						<h1>Welcome to Vane AI</h1>
+						<p>Your crypto-native AI workspace. Build, deploy, and manage on-chain projects with safety and confidence.</p>
+						<div class="ask">
+							<input id="askInput" type="text" placeholder="Ask Vane anything..." />
+							<button class="send" id="sendBtn" type="button" title="Send">^</button>
+						</div>
+						<div class="chips">
+							<button class="chip" data-ask="Explain this contract">Explain this contract</button>
+							<button class="chip" data-ask="Build a token">Build a token</button>
+							<button class="chip" data-ask="Debug transaction">Debug transaction</button>
+							<button class="chip" data-ask="Create a script">Create a script</button>
+							<button class="chip" data-ask="Help me bridge">Help me bridge</button>
+						</div>
+					</div>
+					<div class="logo-glow" aria-hidden="true">
+						<svg viewBox="0 0 120 120"><path fill="#f5f7fa" d="M22 18h22l16 52 16-52h22L66 102H54L22 18z"/></svg>
+					</div>
+				</div>
 
-		<p class="foot">You are in <span id="modeLabel">Safe mode</span>. <button class="link" data-action="home">Refresh Home</button></p>
+				<div class="actions">
+					<button class="action" data-action="openProject">
+						<div class="top"><span>01</span><span>></span></div>
+						<h3>Open Project</h3>
+						<p>Open an existing project from your computer.</p>
+					</button>
+					<button class="action" data-action="newProject">
+						<div class="top"><span>02</span><span>></span></div>
+						<h3>New Project</h3>
+						<p>Create a new crypto project.</p>
+					</button>
+					<button class="action" data-action="wallets">
+						<div class="top"><span>03</span><span class="soon">Soon</span></div>
+						<h3>Connect Wallet</h3>
+						<p>Connect and manage your wallets.</p>
+					</button>
+					<button class="action" data-action="deploy">
+						<div class="top"><span>04</span><span class="soon">Soon</span></div>
+						<h3>Deploy Contract</h3>
+						<p>Deploy smart contracts with confidence.</p>
+					</button>
+					<button class="action" data-action="simulate">
+						<div class="top"><span>05</span><span class="soon">Soon</span></div>
+						<h3>Simulate</h3>
+						<p>Simulate transactions before sending.</p>
+					</button>
+				</div>
+
+				<div class="lower">
+					<div class="card">
+						<div class="card-head">
+							<h2>Recent Projects</h2>
+							<button class="link" data-action="openProject">Open</button>
+						</div>
+						<table class="table">
+							<thead>
+								<tr><th>Name</th><th>Type</th><th>Network</th><th>Status</th></tr>
+							</thead>
+							<tbody id="recentBody">
+								<tr>
+									<td colspan="4" style="color:var(--muted-2)">Open a project to see it here. Sample rows below are previews.</td>
+								</tr>
+								<tr><td>vane-dex-bot</td><td>TypeScript</td><td>Base Sepolia</td><td>Preview</td></tr>
+								<tr><td>contract-auditor</td><td>Solidity</td><td>Ethereum</td><td>Preview</td></tr>
+								<tr><td>alpha-launchpad</td><td>Solidity</td><td>Base</td><td>Preview</td></tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="card">
+						<div class="card-head">
+							<h2>Recent Activity</h2>
+							<span class="link">Coming soon</span>
+						</div>
+						<div class="activity">
+							<div class="item"><span class="mark"></span><div><strong>Contract deployed</strong><span>Preview · not live yet</span></div><span class="when">-</span></div>
+							<div class="item"><span class="mark"></span><div><strong>Transaction confirmed</strong><span>Preview · not live yet</span></div><span class="when">-</span></div>
+							<div class="item"><span class="mark"></span><div><strong>Simulation completed</strong><span>Preview · not live yet</span></div><span class="when">-</span></div>
+							<div class="item"><span class="mark"></span><div><strong>Wallet connected</strong><span>Preview · not live yet</span></div><span class="when">-</span></div>
+						</div>
+					</div>
+				</div>
+
+				<div class="metrics">
+					<div class="metric"><div class="label">Total Balance</div><div class="value">--</div><div class="delta">Connect wallet later</div><svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline fill="none" stroke="#3dd68c" stroke-width="2" points="0,20 20,16 40,18 60,10 80,12 100,6"/></svg></div>
+					<div class="metric"><div class="label">Transactions</div><div class="value">--</div><div class="delta">Soon</div><svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline fill="none" stroke="#9aa6b5" stroke-width="2" points="0,18 25,14 50,16 75,9 100,11"/></svg></div>
+					<div class="metric"><div class="label">Contracts</div><div class="value" id="metricContracts">0</div><div class="delta" id="metricContractsDelta">From open project</div><svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline fill="none" stroke="#9aa6b5" stroke-width="2" points="0,22 30,18 55,12 80,14 100,8"/></svg></div>
+					<div class="metric"><div class="label">Simulations</div><div class="value">--</div><div class="delta">Soon</div><svg class="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline fill="none" stroke="#9aa6b5" stroke-width="2" points="0,16 20,18 45,12 70,14 100,7"/></svg></div>
+				</div>
+				<p class="foot-note">Balance, trade, bridge, and deploy are previews until wallet phases land. Agent + projects work now.</p>
+			</div>
+		</section>
 	</div>
 	<script>
 		const vscode = acquireVsCodeApi();
-		const project = document.getElementById('project');
-		const projectName = document.getElementById('projectName');
-		const projectMeta = document.getElementById('projectMeta');
-		const learn = document.getElementById('learn');
-		const modeLabel = document.getElementById('modeLabel');
+		const askInput = document.getElementById('askInput');
+
+		function sendAsk(text) {
+			const t = (text || askInput.value || '').trim();
+			if (!t) {
+				vscode.postMessage({ type: 'action', action: 'askAgent' });
+				return;
+			}
+			askInput.value = '';
+			vscode.postMessage({ type: 'action', action: 'askAgent', text: t });
+		}
+
+		document.getElementById('sendBtn').addEventListener('click', () => sendAsk());
+		askInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				sendAsk();
+			}
+		});
 
 		document.querySelectorAll('[data-action]').forEach((el) => {
 			el.addEventListener('click', () => {
-				const action = el.getAttribute('data-action');
-				if (action === 'learn') {
-					learn.classList.toggle('show');
-					return;
-				}
-				vscode.postMessage({ type: 'action', action });
+				vscode.postMessage({ type: 'action', action: el.getAttribute('data-action') });
 			});
+		});
+		document.querySelectorAll('[data-ask]').forEach((el) => {
+			el.addEventListener('click', () => sendAsk(el.getAttribute('data-ask')));
 		});
 
 		window.addEventListener('message', (e) => {
 			const m = e.data;
-			if (m.type === 'state') {
-				modeLabel.textContent = m.modeLabel || 'Safe mode';
-				if (m.hasProject) {
-					project.classList.add('show');
-					projectName.textContent = m.projectName || 'Open project';
-					projectMeta.textContent = m.projectSummary || '';
-				} else {
-					project.classList.remove('show');
-				}
+			if (m.type !== 'state') return;
+			document.getElementById('modePill').textContent = m.modeLabel || 'Safe Mode';
+			document.getElementById('modelPill').textContent = m.modelLabel || m.model || 'Model';
+			document.getElementById('chainPill').textContent = m.chain || 'Base Sepolia';
+			document.getElementById('walletPill').textContent = m.walletLabel || 'No wallet connected';
+			const wsName = document.getElementById('wsName');
+			const wsPath = document.getElementById('wsPath');
+			const wsDot = document.getElementById('wsDot');
+			if (m.hasProject) {
+				wsName.textContent = m.projectName || 'Project';
+				wsPath.textContent = m.projectSummary || '';
+				wsDot.classList.add('on');
+				document.getElementById('metricContracts').textContent = String(m.contractCount ?? 0);
+				document.getElementById('metricContractsDelta').textContent = m.kindLabel || 'Open project';
+				const body = document.getElementById('recentBody');
+				body.innerHTML = '';
+				const tr = document.createElement('tr');
+				tr.innerHTML = '<td></td><td></td><td></td><td>Open</td>';
+				tr.children[0].textContent = m.projectName || 'Project';
+				tr.children[1].textContent = m.kindLabel || 'Project';
+				tr.children[2].textContent = m.chain || 'Base Sepolia';
+				body.appendChild(tr);
+			} else {
+				wsName.textContent = 'No project open';
+				wsPath.textContent = 'Open or create a project to begin';
+				wsDot.classList.remove('on');
+				document.getElementById('metricContracts').textContent = '0';
 			}
 		});
 

@@ -58,6 +58,10 @@ export class AgentViewProvider implements vscode.WebviewViewProvider {
 		void this.view?.webview.postMessage(msg);
 	}
 
+	seedInput(text: string): void {
+		this.post({ type: 'seed', text });
+	}
+
 	async pushConfig(): Promise<void> {
 		const cfg = vscode.workspace.getConfiguration('vane');
 		const key = await this.context.secrets.get(SECRET_KEY);

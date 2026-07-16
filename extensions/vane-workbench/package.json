@@ -30,9 +30,11 @@
     "configurationDefaults": {
       "workbench.startupEditor": "none",
       "workbench.tips.enabled": false,
-      "workbench.welcomePage.walkthroughs.openOnInstall": false,
       "chat.commandCenter.enabled": false,
-      "workbench.secondarySideBar.defaultVisibility": "hidden"
+      "workbench.secondarySideBar.defaultVisibility": "hidden",
+      "window.restoreWindows": "none",
+      "window.openWithoutArgumentsInNewWindow": "on",
+      "files.hotExit": "off"
     },
     "configuration": {
       "title": "Vane",
@@ -121,6 +123,11 @@
         "title": "Vane: Open Agent",
         "category": "Vane",
         "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "vane.agent.askWithText",
+        "title": "Vane: Ask Agent",
+        "category": "Vane"
       },
       {
         "command": "vane.openProjectOverview",

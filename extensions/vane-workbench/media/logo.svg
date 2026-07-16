@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="vaneGlow" x1="20" y1="10" x2="100" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="0.55" stop-color="#d7dde6" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#8b95a5" stop-opacity="0.85"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <path filter="url(#soft)" fill="url(#vaneGlow)" d="M22 18h22l16 52 16-52h22L66 102H54L22 18z"/>
+  <path fill="#0a0c10" fill-opacity="0.35" d="M44 18h10l14 46 14-46h10L66 92H54L44 18z"/>
+</svg>

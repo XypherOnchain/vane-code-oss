@@ -6,33 +6,27 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { analyzeWorkspace, modeLabel } from './projectIntel';
+import { analyzeWorkspace, modeLabel, walletLabel } from './projectIntel';
 
 type HomeMsg =
 	| { type: 'ready' }
-	| { type: 'action'; action: string };
+	| { type: 'action'; action: string; text?: string };
 
 export class HomeView {
 	private panel: vscode.WebviewPanel | undefined;
 
 	constructor(private readonly context: vscode.ExtensionContext) { }
 
-	async show(force = false): Promise<void> {
+	async show(_force = false): Promise<void> {
 		if (this.panel) {
 			this.panel.reveal(vscode.ViewColumn.One, false);
 			await this.pushState();
 			return;
 		}
-		if (!force) {
-			const folders = vscode.workspace.workspaceFolders;
-			if (folders?.length) {
-				/* still show Home so beginners land on Vane, not Welcome */
-			}
-		}
 
 		this.panel = vscode.window.createWebviewPanel(
 			'vane.home',
-			'Vane Home',
+			'Vane AI',
 			{ viewColumn: vscode.ViewColumn.One, preserveFocus: false },
 			{
 				enableScripts: true,
@@ -50,7 +44,7 @@ export class HomeView {
 				return;
 			}
 			if (msg.type === 'action') {
-				await this.handleAction(msg.action);
+				await this.handleAction(msg.action, msg.text);
 			}
 		});
 
@@ -64,17 +58,29 @@ export class HomeView {
 	async pushState(): Promise<void> {
 		const cfg = vscode.workspace.getConfiguration('vane');
 		const intel = analyzeWorkspace();
+		const model = String(cfg.get('agent.model') || 'gpt-4o-mini');
 		this.panel?.webview.postMessage({
 			type: 'state',
 			modeLabel: modeLabel(String(cfg.get('operatingMode') || 'code_only')),
+			model,
+			modelLabel: prettyModel(model),
+			chain: String(cfg.get('placeholderChain') || 'Base Sepolia'),
+			walletLabel: walletLabel(String(cfg.get('placeholderWallet') || 'None')) === 'No wallet yet'
+				? 'No wallet connected'
+				: walletLabel(String(cfg.get('placeholderWallet') || 'None')),
 			hasProject: Boolean(intel),
 			projectName: intel?.name,
 			projectSummary: intel ? `${intel.summaryLine}. ${intel.readmeSummary}` : '',
+			kindLabel: intel?.kindLabel,
+			contractCount: intel?.contracts.length ?? 0,
 		});
 	}
 
-	private async handleAction(action: string): Promise<void> {
+	private async handleAction(action: string, text?: string): Promise<void> {
 		switch (action) {
+			case 'homeNav':
+				await this.pushState();
+				break;
 			case 'openProject':
 				await vscode.commands.executeCommand('vscode.openFolder');
 				break;
@@ -83,7 +89,7 @@ export class HomeView {
 				break;
 			case 'askAgent':
 			case 'askProject':
-				await vscode.commands.executeCommand('vane.openAgent');
+				await vscode.commands.executeCommand('vane.agent.askWithText', text || '');
 				break;
 			case 'openProjectView':
 				try {
@@ -95,22 +101,39 @@ export class HomeView {
 			case 'wallets':
 				await vscode.commands.executeCommand('vane.openWallets');
 				void vscode.window.showInformationMessage(
-					'Wallets are next. You can browse the placeholder now; connect comes in a later phase.',
+					'Connect Wallet is next. Placeholder only for now - no keys in the Agent.',
 				);
 				break;
 			case 'trade':
+			case 'bridge':
 				await vscode.commands.executeCommand('vane.openTransactions');
 				void vscode.window.showInformationMessage(
-					'Trade and launch are not available yet. Safe mode only - the Agent cannot send funds.',
+					'Trade / bridge are not available yet. Stay in Safe mode.',
 				);
 				break;
-			case 'home':
-				await this.pushState();
+			case 'deploy':
+			case 'simulate':
+				void vscode.window.showInformationMessage(
+					'Deploy and Simulate land in later phases. Use Agent to prepare contracts for now.',
+				);
+				break;
+			case 'settings':
+				await vscode.commands.executeCommand('workbench.action.openSettings', 'vane.');
 				break;
 			default:
 				break;
 		}
 	}
+}
+
+function prettyModel(model: string): string {
+	if (model.includes('gpt-4o')) {
+		return 'GPT-4o';
+	}
+	if (model.includes('claude')) {
+		return 'Claude';
+	}
+	return model;
 }
 
 async function createGuidedProject(): Promise<void> {
@@ -160,7 +183,7 @@ async function createGuidedProject(): Promise<void> {
 			'',
 			'## What to do next',
 			'',
-			'1. Open the **Agent** panel (rocket icon on the left).',
+			'1. Open the **Agent** from Home.',
 			'2. Ask: "Explain this project and help me add a simple Solidity token."',
 			'3. Approve file edits when Vane asks.',
 			'',
@@ -174,11 +197,7 @@ async function createGuidedProject(): Promise<void> {
 		['node_modules/', 'out/', 'cache/', 'broadcast/', '.env', '.env.*', 'dist/'].join('\n') + '\n',
 		'utf8',
 	);
-	fs.writeFileSync(
-		path.join(root, 'contracts', '.gitkeep'),
-		'',
-		'utf8',
-	);
+	fs.writeFileSync(path.join(root, 'contracts', '.gitkeep'), '', 'utf8');
 
 	const open = await vscode.window.showInformationMessage(
 		`Created ${name.trim()}. Open it now?`,

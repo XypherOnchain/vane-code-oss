@@ -129,6 +129,11 @@
 					' · ' + m.provider + '/' + m.model + ' · ' + (m.modeLabel || m.mode);
 				return;
 			}
+			if (m.type === 'seed' && m.text) {
+				input.value = m.text;
+				input.focus();
+				return;
+			}
 			if (m.type === 'cleared') {
 				log.innerHTML = '';
 				log.appendChild(empty);
