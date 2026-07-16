@@ -1,0 +1,119 @@
+{
+  "name": "vane-workbench",
+  "displayName": "Vane Workbench",
+  "description": "Vane AI activity bar, Agent/Wallets/Transactions views, and status bar placeholders (Phase 1).",
+  "version": "0.1.0",
+  "publisher": "vane",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "contributes": {
+    "configuration": {
+      "title": "Vane",
+      "properties": {
+        "vane.operatingMode": {
+          "type": "string",
+          "default": "code_only",
+          "enum": ["code_only", "simulation", "testnet", "live"],
+          "enumDescriptions": [
+            "Edit and run tools without chain writes",
+            "Fork / simulate only",
+            "Testnet broadcast after approval",
+            "Mainnet — user UI only; AI cannot enable"
+          ],
+          "description": "Display operating mode. Live must only be enabled by the user in a later phase UI — never by the agent."
+        },
+        "vane.placeholderModel": {
+          "type": "string",
+          "default": "Claude",
+          "description": "Placeholder model label for the status bar (Phase 2 wires real providers)."
+        },
+        "vane.placeholderChain": {
+          "type": "string",
+          "default": "Base Sepolia",
+          "description": "Placeholder chain label for the status bar."
+        },
+        "vane.placeholderWallet": {
+          "type": "string",
+          "default": "None",
+          "description": "Placeholder wallet label (no vault in Phase 1)."
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vane",
+          "title": "Vane",
+          "icon": "$(rocket)"
+        }
+      ]
+    },
+    "views": {
+      "vane": [
+        {
+          "id": "vane.agent",
+          "name": "Agent"
+        },
+        {
+          "id": "vane.wallets",
+          "name": "Wallets"
+        },
+        {
+          "id": "vane.transactions",
+          "name": "Transactions"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "vane.openAgent",
+        "title": "Vane: Open Agent",
+        "category": "Vane"
+      },
+      {
+        "command": "vane.openWallets",
+        "title": "Vane: Open Wallets",
+        "category": "Vane"
+      },
+      {
+        "command": "vane.openTransactions",
+        "title": "Vane: Open Transactions",
+        "category": "Vane"
+      },
+      {
+        "command": "vane.showMode",
+        "title": "Vane: Show Operating Mode",
+        "category": "Vane"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "vane.openAgent"
+        },
+        {
+          "command": "vane.openWallets"
+        },
+        {
+          "command": "vane.openTransactions"
+        },
+        {
+          "command": "vane.showMode"
+        }
+      ]
+    }
+  }
+}
