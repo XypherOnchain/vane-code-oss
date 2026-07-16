@@ -36,7 +36,13 @@ export class HomeView {
 		);
 
 		const htmlPath = path.join(this.context.extensionPath, 'media', 'home.html');
-		this.panel.webview.html = fs.readFileSync(htmlPath, 'utf8');
+		const logoUri = this.panel.webview.asWebviewUri(
+			vscode.Uri.joinPath(this.context.extensionUri, 'media', 'vane-logo.png'),
+		);
+		const raw = fs.readFileSync(htmlPath, 'utf8');
+		this.panel.webview.html = raw
+			.replaceAll('{{LOGO_URI}}', logoUri.toString())
+			.replaceAll('{{CSP_SOURCE}}', this.panel.webview.cspSource);
 
 		this.panel.webview.onDidReceiveMessage(async (msg: HomeMsg) => {
 			if (msg.type === 'ready') {
